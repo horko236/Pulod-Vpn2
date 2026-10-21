@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta property="og:title" content="Pulod VPN - Безопасный интернет">
+    <meta property="og:description" content="Быстрый и надежный обход блокировок.">
+    <title>Pulod VPN</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        :root {
+            --bg-color: #000000;
+            --card-bg: #0d0d12;
+            --text-main: #ffffff;
+            --text-muted: #8a8a93;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Свечение на фоне */
+        .bg-glow {
+            position: fixed;
+            width: 350px;
+            height: 350px;
+            background: rgba(139, 92, 246, 0.15);
+            filter: blur(100px);
+            border-radius: 50%;
+            z-index: -1;
+            top: -10%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .bg-glow.secondary {
+            background: rgba(59, 130, 246, 0.1);
+            top: 60%;
+            left: 10%;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 20px;
+        }
+
+        header h1 {
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            text-align: center;
+            background: linear-gradient(90deg, #a78bfa, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .status-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dot {
+            width: 10px;
+            height: 10px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 12px #10b981;
+        }
+
+        .status-text h3 {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .status-text p {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        /* Вкладки (Табы) - теперь их 2 */
+        .tabs {
+            display: flex;
+            background: #0d0d12;
+            border-radius: 30px;
+            padding: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+        }
+
+        .tab {
+            flex: 1; /* Теперь каждая занимает ровно 50% */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            padding: 12px 0;
+            border-radius: 25px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            z-index: 1;
+        }
+
+        .tab.active {
+            color: white;
+        }
+
+        .tab .icon {
+            font-size: 18px;
+        }
+
+        /* Подсветка активной вкладки */
+        .tab-indicator {
+            position: absolute;
+            top: 6px;
+            bottom: 6px;
+            width: calc(50% - 4px); /* Ширина 50% минус отступы */
+            background: #1a1a24;
+            border-radius: 25px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 0;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .content-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 24px;
+            transition: border-color 0.3s;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .content-title {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+        }
+
+        .content-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(139, 92, 246, 0.15);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            transition: all 0.3s;
+        }
+
+        .content-title h2 {
+            font-size: 19px;
+            font-weight: 800;
+        }
+
+        .content-title p {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .global-badge {
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border-radius: 16px;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.1s, opacity 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .btn:active {
+            transform: scale(0.96);
+        }
+
+        .btn-primary {
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #1a1a24;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .bottom-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 10px;
+            margin-top: 10px;
+        }
+
+        .nav-item {
+            color: var(--text-muted);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .nav-item:hover {
+            color: white;
+        }
+
+        .nav-share {
+            background: linear-gradient(90deg, #8b5cf6, #3b82f6);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+        }
+
+        .toast {
+            position: fixed;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a24;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: top 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 100;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .toast.show {
+            top: 20px;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 50;
+        }
+
+        .modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            background: #0d0d12;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transform: scale(0.9);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .qr-container {
+            width: 220px;
+            height: 220px;
+            background: white;
+            border-radius: 16px;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+
+        .qr-container img {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+        }
+
+        .close-modal {
+            background: #1a1a24;
+            border: 1px solid rgba(255,255,255,0.1);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-glow"></div>
+    <div class="bg-glow secondary"></div>
+
+    <div class="app-container">
+        <header>
+            <h1>Pulod VPN</h1>
+        </header>
+
+        <div class="status-card">
+            <div class="status-left">
+                <div class="dot"></div>
+                <div class="status-text">
+                    <h3>Подписки</h3>
+                    <p>Доступны</p>
+                </div>
+            </div>
+            <div class="badge">Защищено</div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab-indicator" id="tab-indicator"></div>
+            <!-- Вкладка Blacklist -->
+            <div class="tab active" onclick="switchTab(0)">
+                <span class="icon">🌐</span>
+                <span>Blacklist</span>
+            </div>
+            <!-- Вкладка Lite -->
+            <div class="tab" onclick="switchTab(1)">
+                <span class="icon">⚡</span>
+                <span>Lite</span>
+            </div>
+        </div>
+
+        <div class="content-card" id="content-card">
+            <div class="content-header">
+                <div class="content-title">
+                    <div class="content-icon" id="dynamic-icon">🌐</div>
+                    <div>
+                        <h2 id="dynamic-title">Blacklist</h2>
+                        <p id="dynamic-desc">Глобальный обход блокировок</p>
+                    </div>
+                </div>
+                <div class="global-badge" id="dynamic-badge">Global</div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="copy-btn" onclick="copyLink()">
+                    📋 Копировать
+                </button>
+                <button class="btn btn-secondary" onclick="openQR()">
+                    📱 QR-код
+                </button>
+            </div>
+        </div>
+
+        <div class="bottom-nav">
+            <button class="nav-share" onclick="shareLink()">
+                🔗 Поделиться
+            </button>
+            <a href="#" class="nav-item">Tutorial</a>
+            <a href="#" class="nav-item">Channel</a>
+            <a href="#" class="nav-item">Donate</a>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">Скопировано!</div>
+
+    <div class="modal" id="qr-modal" onclick="closeQR(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h3 style="margin-bottom: 20px;">Сканируй для импорта</h3>
+            <div class="qr-container">
+                <img id="qr-image" src="" alt="QR Code">
+            </div>
+            <button class="close-modal" onclick="closeQR()">Закрыть</button>
+        </div>
+    </div>
+
+    <script>
+        // Обновленные ссылки. 0 - Blacklist, 1 - Lite. (Whitelist удален)
+        const vpnLinks = {
+            0: "https://gist.githubusercontent.com/horko236/1525dcce51d9b1a839d85ff43535e63a/raw/pulod.txt?t=1",
+            1: "https://gist.githubusercontent.com/horko236/4766da8a03aee9044f3dd92b04290cc0/raw/pulod.txt?t=2"
+        };
+
+        // Настройки дизайна
+        const tabConfig = {
+            0: { title: "Blacklist", desc: "Глобальный обход блокировок", badge: "Global", color: "#8b5cf6", bg: "rgba(139, 92, 246, 0.15)", icon: "🌐" },
+            1: { title: "Lite", desc: "Быстрый доступ", badge: "Fast", color: "#3b82f6", bg: "rgba(59, 130, 246, 0.15)", icon: "⚡" }
+        };
+
+        let currentTab = 0;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            updateUI(0);
+        });
+
+        function switchTab(index) {
+            currentTab = index;
+            updateUI(index);
+        }
+
+        function updateUI(index) {
+            const indicator = document.getElementById('tab-indicator');
+            // Двигаем индикатор. Так как вкладки 2, то сдвиг на 100% при клике на вторую
+            indicator.style.transform = `translateX(${index * 100}%)`;
+
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach((tab, i) => {
+                if(i === index) tab.classList.add('active');
+                else tab.classList.remove('active');
+            });
+
+            const config = tabConfig[index];
+
+            document.getElementById('dynamic-title').innerText = config.title;
+            document.getElementById('dynamic-desc').innerText = config.desc;
+            
+            const badge = document.getElementById('dynamic-badge');
+            badge.innerText = config.badge;
+            badge.style.color = config.color;
+            badge.style.backgroundColor = config.bg;
+            badge.style.border = `1px solid ${config.color}40`; 
+
+            const icon = document.getElementById('dynamic-icon');
+            icon.innerText = config.icon;
+            icon.style.color = config.color;
+            icon.style.background = config.bg;
+
+            const copyBtn = document.getElementById('copy-btn');
+            copyBtn.style.background = config.color;
+            copyBtn.style.boxShadow = `0 4px 15px ${config.color}50`;
+        }
+
+        function copyLink() {
+            const link = vpnLinks[currentTab];
+            navigator.clipboard.writeText(link).then(() => {
+                showToast("Ссылка скопирована!");
+            }).catch(err => {
+                showToast("Ошибка копирования");
+            });
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function shareLink() {
+            const link = vpnLinks[currentTab];
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Pulod VPN',
+                    text: `Подключение ${tabConfig[currentTab].title} для Pulod VPN`,
+                    url: link
+                }).catch(console.error);
+            } else {
+                navigator.clipboard.writeText(link);
+                showToast("Ссылка скопирована для отправки!");
+            }
+        }
+
+        function openQR() {
+            const link = vpnLinks[currentTab];
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(link)}`;
+            document.getElementById('qr-image').src = qrUrl;
+            document.getElementById('qr-modal').classList.add('active');
+        }
+
+        function closeQR(e) {
+            if (e && e.target !== e.currentTarget) return;
+            document.getElementById('qr-modal').classList.remove('active');
+        }
+    </script>
+</body>
+  </html>
